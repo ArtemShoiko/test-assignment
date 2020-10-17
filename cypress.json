@@ -1,0 +1,6 @@
+{
+  "env": {
+    "RAPID_API_KEY": "457045469fmsh20e158c5b75bb73p107bfbjsnfc1668f74dbf",
+    "GET_CLOSEST_ASTEROIDS_API": "https://NasaAPIdimasV1.p.rapidapi.com/getClosestAsteroids" 
+  }
+}

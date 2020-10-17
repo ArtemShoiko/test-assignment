@@ -1,0 +1,17 @@
+{
+  "name": "artem-shoiko-test-assignment",
+  "version": "1.0.0",
+  "description": "API and NoSQL db testing",
+  "main": "index.js",
+  "dependencies": {
+    "cypress": "^5.4.0",
+    "mongodb": "^3.6.2"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "cypress run",
+    "cy:open": "cypress open"
+  },
+  "author": "Artem Shoiko",
+  "license": "ISC"
+}
