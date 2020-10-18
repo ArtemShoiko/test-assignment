@@ -11,7 +11,7 @@ const getRandomData = () => {
     },
     birthdate: Cypress
       .moment(
-        faker.date.past()
+        faker.date.past(60)
       )
       .format('YYYY-MM-DD'), // faker generates past date and Cypress.moment() formats it in the needed way
     phone_numbers: [

@@ -15,12 +15,15 @@
 /**
  * @type {Cypress.PluginConfig}
  */
-
 const MongoClient = require('mongodb').MongoClient;
 
 let dbName = 'cinema'
 let dbCollection = 'movies'
-
+const getDateYearsAgo = (years) => {
+  let dateYearsAgo = new Date()
+  dateYearsAgo.setFullYear( dateYearsAgo.getFullYear() - years )
+  return dateYearsAgo
+}
 
 module.exports = (on, config) => {
   on('task', {
@@ -66,9 +69,8 @@ module.exports = (on, config) => {
   })  // end of task
 
   on('task', {
-    getPatientsAbove(age)  {
-      let dateYearsAgo = new Date();
-      dateYearsAgo.setFullYear( dateYearsAgo.getFullYear() - age ); // create date needed for comparing
+    getPatientsAboveAge(age)  {
+      let patientBirthdate = getDateYearsAgo(age)
 
       return new Promise((resolve) => {
           MongoClient.connect('mongodb://localhost:27017', (err, client) => {
@@ -93,7 +95,7 @@ module.exports = (on, config) => {
                       {
                           $match: {
                               formattedDate: {
-                                  $lt: dateYearsAgo // here you can provide your input date yyyy-mm-dd
+                                  $lte: patientBirthdate 
                               }
                           }
                       }
@@ -108,4 +110,49 @@ module.exports = (on, config) => {
         }) // end of return Promise
       }
   })  // end of task
+
+  on('task', {
+    getPatientsWithUpdatedDateAbove (date) {
+      return new Promise((resolve) => {
+        MongoClient.connect('mongodb://localhost:27017', (err, client) => {
+          if (err) {
+            console.log(`MONGO CONNECTION ERROR: ${err}`)  
+            throw err
+          } else {
+            const db = client.db(dbName);
+            const collection = db.collection(dbCollection)
+            const items = collection
+              .aggregate(
+                [
+                    {
+                        $project: {
+                          phone_numbers: {
+                                $filter: {
+                                    input: "$phone_numbers",
+                                    as: "phone",
+                                    cond: { $eq : ["$$phone.is_primary", true] }
+                                }
+                            },
+                          system_status: 1,
+                          name: 1,
+                          birthdate: 1
+                        }
+                    },
+                    {
+                      $match: {
+                          "phone_numbers.record_change_details.updated_date": {
+                              $lt: date
+                          }
+                      }
+                    }
+                ]
+              )           
+              .toArray()
+            resolve(items)
+            client.close()
+          }
+        });
+      }); // end of return Promise
+    }
+  }) // end of task
 }
