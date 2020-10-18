@@ -1,6 +1,6 @@
 {
   "env": {
-    "RAPID_API_KEY": "457045469fmsh20e158c5b75bb73p107bfbjsnfc1668f74dbf",
-    "GET_CLOSEST_ASTEROIDS_API": "https://NasaAPIdimasV1.p.rapidapi.com/getClosestAsteroids" 
+    "RAPID_API_KEY": "pZVseFTTbP4MkGbOBVJiPSVJybI4oKjIY1a9ivsO",
+    "GET_CLOSEST_ASTEROIDS_API": "https://api.nasa.gov/neo/rest/v1/feed/today" 
   }
 }
