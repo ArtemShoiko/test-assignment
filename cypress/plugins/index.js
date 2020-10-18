@@ -42,28 +42,6 @@ module.exports = (on, config) => {
   }), // end of task
 
   on('task', {
-    getPatients()  {
-      return new Promise((resolve) => {
-          MongoClient.connect('mongodb://localhost:27017', (err, client) => {
-            if (err) {
-              console.log(`MONGO CONNECTION ERROR: ${err}`)  
-              throw err
-            } else {
-              const db = client.db(dbName);
-              const collection = db.collection(dbCollection)
-              const patients = collection
-                .find({ birthdate: { $exists: true } })
-                // .find({ birthdate: '2020-05-31' })  //  
-                .toArray()
-              resolve(patients)
-              client.close()
-            }
-          });
-        }) // end of return Promise
-      }
-  })  // end of task
-
-  on('task', {
     getPrimaryPhones()  {
       return new Promise((resolve) => {
         MongoClient.connect('mongodb://localhost:27017', (err, client) => {
@@ -85,5 +63,49 @@ module.exports = (on, config) => {
         });
       }) // end of return Promise
     }
+  })  // end of task
+
+  on('task', {
+    getPatientsAbove(age)  {
+      let dateYearsAgo = new Date();
+      dateYearsAgo.setFullYear( dateYearsAgo.getFullYear() - age ); // create date needed for comparing
+
+      return new Promise((resolve) => {
+          MongoClient.connect('mongodb://localhost:27017', (err, client) => {
+            if (err) {
+              console.log(`MONGO CONNECTION ERROR: ${err}`)  
+              throw err
+            } else {
+              const db = client.db(dbName);
+              const collection = db.collection(dbCollection)
+              const patients = collection
+                .aggregate(
+                  [
+                      {
+                          $addFields: {
+                              formattedDate: { // An extra field "formattedDate" is added in each document which can be compared later through pipeline using $match
+                                  $dateFromString: {
+                                      dateString: "$birthdate"
+                                  }
+                              }
+                          }
+                      },
+                      {
+                          $match: {
+                              formattedDate: {
+                                  $lt: dateYearsAgo // here you can provide your input date yyyy-mm-dd
+                              }
+                          }
+                      }
+                  ]
+                )
+                .project({ formattedDate: 0 })
+                .toArray()
+              resolve(patients)
+              client.close()
+            }
+          });
+        }) // end of return Promise
+      }
   })  // end of task
 }
